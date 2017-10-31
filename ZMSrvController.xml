@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.1 (Build 792)" ts="2017-10-12 09:54:56">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2013.1.4 (Build 801)" ts="2017-10-31 08:56:50">
 <Class name="%ZMSrv.Controller">
 <Description><![CDATA[
-<br>  Класс написан для организации обмена между серверами Cache'
+<br>  Класс написан для организации обмена между серверами Cache'.
+<br>  За счет прямого подключения между сервирами Cache` по указанному порту, достигается максимальная скорость.
 <br>  Для соединения применяются пльзоватили системы.
 <H3>  Обрабатываемые команды:</H3>
 <pre><h4>
@@ -22,17 +23,17 @@
    </h4>
 </pre>
 <h4> Запуск сервера </h4> 
- <example> ; 8200 - номер порта для соединения
+ <example> ; 6006 - номер порта для соединения
  ;"sirena" - область имен по умолчанию   
- do ##class(%ZMSrv.Controller).StartSRV(8200,"sirena")</example>
+ do ##class(%ZMSrv.Controller).StartSRV(6006,"sirena")</example>
  
 <h4> Остановить сервер </h4> 
- <example>; 8200 - номер порта для соединения 
-  do ##class(%ZMSrv.Controller).StopSRV(8200) </example>
+ <example>; 6006 - номер порта для соединения 
+  do ##class(%ZMSrv.Controller).StopSRV(6006) </example>
 
 <h4> Проверить запущен ли сервер</h4> 
  <example>                                         ;    IP       ,Port
-  if ##class(%ZMSrv.Controller).ExistSRV("10.100.12.21",8200)=1{
+  if ##class(%ZMSrv.Controller).ExistSRV("10.100.12.21",6006)=1{
      W "Сервер доступен" 
   } else {
      W "Сервер НЕ доступен " 
@@ -43,7 +44,7 @@
 <example>
   s obj=##class(%ZMSrv.Controller).%New()
   s obj.Host="127.0.0.1"
-  s obj.Port=8200
+  s obj.Port=6006
   s obj.UserName="_SYSTEM"
   s obj.UserPass="SYS"
   s obj.NameSpace="sirena"
@@ -78,7 +79,7 @@
  ;  }
   s obj=##class(%ZMSrv.Controller).%New()
   s obj.Host="ne1234"
-  s obj.Port=8200
+  s obj.Port=6006
   s obj.UserName="_SYSTEM"
   s obj.UserPass="SYS"
   s obj.NameSpace="sirena"
@@ -98,7 +99,7 @@
            s SqlStr="select * from %SYS.ProcessQuery"
            s obj=##class(%ZMSrv.Controller).%New()
            ;   s obj.Host="127.0.0.1"
-           ;   s obj.Port=8200
+           ;   s obj.Port=6006
            ;   s obj.UserName="_SYSTEM"
            ;   s obj.UserPass="SYS"            
            s obj.NameSpace="SAMPLES"
@@ -130,7 +131,7 @@
  <example>
               s obj=##class(%ZMSrv.Controller).%New()
               ;   s obj.Host="127.0.0.1"
-              ;   s obj.Port=8200
+              ;   s obj.Port=6006
               ;   s obj.UserName="_SYSTEM"
               ;   s obj.UserPass="SYS"
                 s obj.NameSpace="SAMPLES"
@@ -157,7 +158,7 @@
  <example>
       s obj=##class(%ZMSrv.Controller).%New()
       s obj.Host="127.0.0.1"
-      s obj.Port=8200
+      s obj.Port=6006
       s obj.UserName="_SYSTEM"
       s obj.UserPass="SYS"
       s obj.NameSpace="SAMPLES"
@@ -175,7 +176,7 @@
          ; --delete from TabDst4
           s obj=##class(%ZMSrv.Controller).%New()
           s obj.Host="127.0.0.1"
-          s obj.Port=8200
+          s obj.Port=6006
           s obj.UserName="_SYSTEM"
           s obj.UserPass="SYS"
           s obj.NameSpace="SAMPLES"
@@ -212,7 +213,7 @@
  <example>
           s obj=##class(%ZMSrv.Controller).%New()
           s obj.Host="127.0.0.1"
-          s obj.Port=8200
+          s obj.Port=6006
           s obj.UserName="_SYSTEM"
           s obj.UserPass="SYS"
           s obj.NameSpace="SAMPLES"
@@ -239,7 +240,7 @@
  </example>]]></Description>
 <Language>cache</Language>
 <Super>%RegisteredObject,%CSP.Page</Super>
-<TimeChanged>64541,52915.73293</TimeChanged>
+<TimeChanged>64587,32201.955387</TimeChanged>
 <TimeCreated>64538,72047.112396</TimeCreated>
 
 <Parameter name="RawTag">
@@ -302,7 +303,7 @@
 <Description>
 Порт подключения </Description>
 <Type>%String</Type>
-<InitialExpression>8200</InitialExpression>
+<InitialExpression>6000</InitialExpression>
 </Property>
 
 <Property name="NameSpace">
@@ -323,7 +324,9 @@
 <Description><![CDATA[
 Признак кодирования исходящих команд 
 <br> Увеличивает исходящий трафик, но перехват сообщений бесполезен, так как 
-<br> шифрование идет с применением ключа сессии.]]></Description>
+<br> шифрование идет с применением ключа сессии.
+<br> 1-шифрование включено
+<br> 0-шифрование выключено]]></Description>
 <Type>%Library.Boolean</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
@@ -399,7 +402,7 @@
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     /// Порт подключения 
-    s Port=8200
+    s Port=6000
     if $d(%request.Data("port",1))
     {
        s Port=%request.Data("port",1)  
@@ -424,7 +427,7 @@
 <Description>
  Проверить доступность сервера</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>HostLoc="127.0.0.1",PortLoc=8200</FormalSpec>
+<FormalSpec>HostLoc="127.0.0.1",PortLoc=6006</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
   s res=1
@@ -797,7 +800,7 @@ Err
  s obj=##class(%ZMSrv.Controller).%New()
  // s obj.Host="127.0.0.1"
  s obj.Host="ne1234"
- s obj.Port=8200
+ s obj.Port=6006
  s obj.UserName="_SYSTEM"
  s obj.UserPass="SYS"
  s obj.NameSpace="sirena"
@@ -933,7 +936,7 @@ Err
 <Description>
 Остоновить сервер</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>port=8200</FormalSpec>
+<FormalSpec>port=6006</FormalSpec>
 <Implementation><![CDATA[
   SET port = $G(port)
   if $l(port)'=0  d
@@ -950,7 +953,7 @@ Err
 <Description>
 Запустить сервер</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>port=8200,DefNameSpace=""</FormalSpec>
+<FormalSpec>port=6006,DefNameSpace=""</FormalSpec>
 <Implementation><![CDATA[
      s:DefNameSpace="" DefNameSpace=$ZU(5)
      d ..killTempRutine()
@@ -1076,7 +1079,7 @@ Err
  .  ; Декодируем если необходимо
  .  TRY{ if ^||isDecodeClientCommand=1 s ^||inData=$$$cspDecode(%session.Key,^||inData)}CATCH {}
  .  s ^||inData= $ZCVT(^||inData,"I","URL")
- .  s ^||inData= $ZCVT(^||inData,"I","UTF8")
+ .  ; s ^||inData= $ZCVT(^||inData,"I","UTF8")
  .  s ^||ind=^||ind+1
  .  ; Авторизация 
  .  if ^||ind=1  d ..setProcInfo("Авторизация",20)  if ^||inData="ping" { w "ok" d ..stopCmd()  s ^||isCloseChaild=1 q }   s ^||UserName=^||inData  s ^||inData=""  w $System.Encryption.Base64Encode(%session.Key)  d ..stopCmd()  q
@@ -1394,6 +1397,24 @@ ztrunOneCode
 ]]></Implementation>
 </Method>
 
+<Method name="SqlGetAt">
+<Description>
+Получить значение указанного поля</Description>
+<FormalSpec>SqlObjectName="",PoleName=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  s ..Error=""
+  if $d(%MApplication) d %MApplication.ProcessMessages()
+  if $d(MApplication) d MApplication.ProcessMessages()
+  if SqlObjectName="" s SqlObjectName="DataSet"
+  if PoleName="" {
+     s ..Error="Не указано имя поля, для чтения результата запроса"
+     q ""
+  }
+  q ..Send("run:  w "_SqlObjectName_".%Get("""_PoleName_""") ")
+]]></Implementation>
+</Method>
+
 <Method name="SqlGetRaw">
 <Description>
 Получить строку записей в из резултата SQL запроса
@@ -1405,22 +1426,23 @@ ztrunOneCode
   if $d(%MApplication) d %MApplication.ProcessMessages()
   if $d(MApplication) d MApplication.ProcessMessages()
   if SqlObjectName="" s SqlObjectName="DataSet"
-  s ^||rawTxtSqlGetRaw=..Send("run:  for ColNum=1:1:Q"_SqlObjectName_".columnCount { s val="_SqlObjectName_".%GetData(ColNum) s nam=Q"_SqlObjectName_".columns.GetAt(ColNum).colName   w $ZCVT(nam,""O"",""JS"")_$c(9)_$ZCVT(val,""O"",""JS"")_""{{RAW}}""   }")
-  s arr=##class(%ZEN.proxyObject).%New()
-  ; s aux=##class(%ArrayOfDataTypes).%New() 
-  for indSqlGetRaw=1:1:$l(^||rawTxtSqlGetRaw,"{{RAW}}") {
-      s ^||SqlGetRawraw=$p(^||rawTxtSqlGetRaw,"{{RAW}}",indSqlGetRaw)
-      continue:$l(^||SqlGetRawraw)=0
-      s ^||namSqlGetRaw=$zcvt(  $p(^||SqlGetRawraw,$c(9),1) ,"I","JS")
-      s ^||valSqlGetRaw=$zcvt(  $p(^||SqlGetRawraw,$c(9),2) ,"I","JS")
-      try {
-        s arr.%data(^||namSqlGetRaw)=^||valSqlGetRaw
-      }CATCH ErrorHandle{ 
-        s ..Error=ErrorHandle
-        s arr=-1
-        q
-      }  
-  }
+     s ^||rawTxtSqlGetRaw=..Send("run:  for ColNum=1:1:Q"_SqlObjectName_".columnCount { s val="_SqlObjectName_".%GetData(ColNum) s nam=Q"_SqlObjectName_".columns.GetAt(ColNum).colName   w $ZCVT(nam,""O"",""JS"")_$c(9)_$ZCVT(val,""O"",""JS"")_""{{RAW}}""   }")
+     s arr=##class(%ZEN.proxyObject).%New()
+     ; s aux=##class(%ArrayOfDataTypes).%New() 
+     for indSqlGetRaw=1:1:$l(^||rawTxtSqlGetRaw,"{{RAW}}") {
+         s ^||SqlGetRawraw=$p(^||rawTxtSqlGetRaw,"{{RAW}}",indSqlGetRaw)
+         continue:$l(^||SqlGetRawraw)=0
+         s ^||namSqlGetRaw=$zcvt(  $p(^||SqlGetRawraw,$c(9),1) ,"I","JS")
+         s ^||valSqlGetRaw=$zcvt(  $p(^||SqlGetRawraw,$c(9),2) ,"I","JS")
+         try {
+           s arr.%data(^||namSqlGetRaw)=^||valSqlGetRaw
+         }CATCH ErrorHandle{ 
+           s ..Error=ErrorHandle
+           s arr=-1
+           q
+         }  
+     }
+  
   q arr
 ]]></Implementation>
 </Method>
@@ -1597,7 +1619,7 @@ ztrunOneCode
 Метод создания таблицы из SQL запроса
            s obj=##class(%ZMSrv.Controller).%New()
            s obj.Host="127.0.0.1"
-           s obj.Port=8200
+           s obj.Port=6006
            s obj.UserName="_SYSTEM"
            s obj.UserPass="SYS"
            s obj.NameSpace="SAMPLES"
@@ -1816,6 +1838,57 @@ NewIndex(ClassObj,name,ColName)
  ;  }
    k cmdCacheExec,cmdCacheExecindexSPOOL2,cmdCacheExecindexSPOOL
    q cmdCacheExecres
+]]></Implementation>
+</Method>
+
+<Method name="CopyFile">
+<Description>
+Копировать файлы между серверами
+ (!!!Работает с ошибкой При передачи бинарных файлов - писался для текстовых файлов!!!!)
+ d ##class(%ZMSrv.Controller).CopyFile("ne1232","D:\backup\log.txt","ne1232","D:\backup\Copylog.txt")
+ d ##class(%ZMSrv.Controller).CopyFile("ne1232","d:\backup\Penguins.jpg","ne1232","d:\backup\Penguins2.jpg")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SrcSrv=$ZU(5),SrcDir,DstSrv=$ZU(5),DstDir</FormalSpec>
+<Implementation><![CDATA[
+	  s objSrc=##class(%ZMSrv.Controller).%New()
+	  s objSrc.Host=SrcSrv
+	  s objSrc.Port=6006
+	  s objSrc.UserName="_SYSTEM"
+	  s objSrc.UserPass="SYS"
+	  if objSrc.Connect()=1 {
+         s objDst=##class(%ZMSrv.Controller).%New()
+	     s objDst.Host=DstSrv
+	     s objDst.Port=6006
+	     s objDst.UserName="_SYSTEM"
+	     s objDst.UserPass="SYS"
+         if objDst.Connect()=1 {
+             w !,objSrc.Send("ip")     
+             w !,objSrc.Send("run: w $ZU(110)")       
+             w !,objSrc.Send("run: w $job")
+             d objSrc.Send("run: s file=##class(%FileCharacterStream).%New()")
+             d objSrc.Send("run: s file.Filename="""_SrcDir_""" ")  
+             d objDst.Send("run:  Set fileDst=##class(%File).%New("""_DstDir_""")")
+             d objDst.Send("run:  Do fileDst.Open(""WSN"") ")  
+             for   {
+	             q:objSrc.Send("run: w file.AtEnd ")
+                ;  s frag=objSrc.Send("run: w $ASCII(file.Read(1))  ") 
+   	            ;  d objDst.Send("run:  w fileDst.Write($C("_frag_"))   ")  
+                s frag=objSrc.Send("run: w $system.Encryption.Base64Encode(file.Read(50))  ")
+                d objDst.Send("run:  w fileDst.Write($system.Encryption.Base64Decode("""_frag_"""))   ")  
+                ; s frag=$system.Encryption.Base64Decode(objSrc.Send("run: w $system.Encryption.Base64Encode(file.Read(50))  ") )
+                ; d objDst.Send("run:  w fileDst.Write($system.Encryption.Base64Decode("""_$system.Encryption.Base64Encode(frag)_"""))   ")  
+             }
+             d objSrc.Send("cls")  
+             d objDst.Send("run:  s fileDst="""" ")  
+         }else{
+	        w !,"Error: "_objDst.Error,!
+	     }
+         d objDst.DisConnect()
+	  }else{
+	     w !,"Error: "_objSrc.Error,!
+	  }
+	  d objSrc.DisConnect()
+	  q
 ]]></Implementation>
 </Method>
 </Class>
