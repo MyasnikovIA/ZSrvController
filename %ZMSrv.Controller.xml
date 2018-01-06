@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2013.1.4 (Build 801)" ts="2017-12-05 15:51:57">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-32) 2017.1 (Build 792)" ts="2018-01-06 21:28:16">
 <Class name="%ZMSrv.Controller">
 <Description><![CDATA[
 <br>  Класс написан для организации обмена между серверами Cache'.
@@ -240,7 +240,7 @@
  </example>]]></Description>
 <Language>cache</Language>
 <Super>%RegisteredObject,%CSP.Page</Super>
-<TimeChanged>64622,57002.111333</TimeChanged>
+<TimeChanged>64654,77275.481511</TimeChanged>
 <TimeCreated>64538,72047.112396</TimeCreated>
 
 <Parameter name="RawTag">
@@ -449,11 +449,16 @@
 <Method name="Connect">
 <Description>
 Создать соединение с сервером</Description>
+<FormalSpec>Host="",Port="",NameSpace="",UserName="",UserPass=""</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
   #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
   #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
-
+  s:Host'="" ..Host=Host
+  s:Port'="" ..Port=Port
+  s:UserName'="" ..UserName=UserName
+  s:UserPass'="" ..UserPass=UserPass
+  s:NameSpace'="" ..NameSpace=NameSpace
   s ..isConnected=0
   SET ..IO="|TCP|2" 
   CLOSE ..IO
