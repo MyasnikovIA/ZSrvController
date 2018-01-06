@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-32) 2017.1 (Build 792)" ts="2018-01-06 21:28:16">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-32) 2017.1 (Build 792)" ts="2018-01-06 21:43:03">
 <Class name="%ZMSrv.Controller">
 <Description><![CDATA[
 <br>  Класс написан для организации обмена между серверами Cache'.
@@ -39,6 +39,25 @@
      W "Сервер НЕ доступен " 
   } </example>
 <br><br><br>
+<h4>  Пример подключения к Серверу из Cache' </h4> 
+<example>
+  s obj=##class(%ZMSrv.Controller).%New()
+  if obj.Connect("127.0.0.1",6006,"sirena","_SYSTEM","SYS")=1 {
+     w !,obj.Send("ip")     
+     w !,obj.Send("run: w $ZU(110)")       
+     ; Наполняем буфер командами Cache'
+     d obj.Send(" for a=1:1:100 d ")       
+     d obj.Send(" .   w $JOB_"":""_a         ")      
+     d obj.Send(" .   w $c(13,10) ")     
+     w !,obj.Send("run") ; запустить выполнение команд в буфере
+     d obj.Send("cls")   ; Очистить буфер на стороне сервера 
+     w !,"SessionKey: "_obj.SessionKey
+  }else{
+     w !,"Error: "_obj.Error,!
+  }
+  d obj.DisConnect()
+  q
+</example>
 
 <h4>  Пример подключения к Серверу из Cache' </h4> 
 <example>
@@ -240,7 +259,7 @@
  </example>]]></Description>
 <Language>cache</Language>
 <Super>%RegisteredObject,%CSP.Page</Super>
-<TimeChanged>64654,77275.481511</TimeChanged>
+<TimeChanged>64654,78155.77446</TimeChanged>
 <TimeCreated>64538,72047.112396</TimeCreated>
 
 <Parameter name="RawTag">
