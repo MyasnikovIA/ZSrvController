@@ -15,6 +15,21 @@
 
 <br> <h4>  Пример подключения к Серверу из Cache' </h4> <br> 
 <pre>
+          s obj=##class(%ZMSrv.Controller).%New()
+	  if obj.Connect("127.0.0.1","SAMPLES",6010,"_SYSTEM","SYS")=1 { 
+	     w !,obj.Send("run: w $h")
+	     s ExternalObject=obj.GetObject("Cinema.Film","1" )
+	     w !,!
+	     zw ExternalObject
+	  }else{
+	     w !,"Error: "_obj.Error,!
+	  }
+	  d obj.DisConnect()
+	  s obj=""
+</pre>  
+
+<br> <h4>  Пример подключения к Серверу из Cache' </h4> <br> 
+<pre>
           s obj=##class(%ZMSrv.Controller).%New()
 	  if obj.Connect("127.0.0.1",6006,"USER","_SYSTEM","SYS")=1 {
 	     w !,obj.Send("ip")     
