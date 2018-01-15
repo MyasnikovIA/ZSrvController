@@ -384,20 +384,21 @@ ClassMethod ExistSRV(HostLoc = "127.0.0.1", PortLoc = 6006) As %Boolean
 }
 
 /// Создать соединение с сервером
-Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "") As %Boolean
+Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "", isEncode = 0) As %Boolean
 {
   s:Host'="" ..Host=Host
   s:NameSpace'="" ..NameSpace=NameSpace
   s:Port'="" ..Port=Port
   s:UserName'="" ..UserName=UserName
   s:UserPass'="" ..UserPass=UserPass
-  if $SYSTEM.Security.Login(..UserName,..UserPass)=0 {
-     s ..Error="Ошибка авторизации"
-     q 0   
-  }
+  s ..isCode=isEncode
+  ;  if $SYSTEM.Security.Login(..UserName,..UserPass)=0 {
+  ;    s ..Error="Ошибка авторизации"
+  ;    q 0   
+  ;  }
   #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
   #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
-  s ..isConnected=0
+  SET ..isConnected=0
   SET ..IO="|TCP|2" 
   CLOSE ..IO
   OPEN ..IO:(..Host:..Port:"M"):5 
@@ -445,6 +446,7 @@ Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "
     USE ..IO    w ..UserName,!,*-1
     READ key  READ x 
     s ..SessionKey= $System.Encryption.Base64Decode( key )
+    
     if ..isCode=1 USE ..IO    w $$$cspEncode(..SessionKey,..UserPass),!,*-1  
     else          USE ..IO    w ..UserPass                           ,!,*-1  
     USE ..IO READ x 
@@ -462,6 +464,8 @@ Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "
   }
   q:^||isBreack=1 0
   k ^||isBreack
+  u 0
+  
   // отправляем пустой запрос
   if ..isCode=1  USE ..IO w $$$cspEncode(..SessionKey,"ip"),!,*-1 READ x,x,x  USE 0
   else           USE ..IO w "ip",!,*-1 READ x,x,x  USE 0
@@ -475,12 +479,12 @@ Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "
 Method DisConnect()
 {
   if ..isConnected=1 {
-   s ..isConnected=0
+    s ..isConnected=0
     s $ZTRAP="Err"
-     SET ..IO="|TCP|2" 
-     ; Отклчение от сервера
-     d ..Send("exit")
-     CLOSE ..IO 
+    SET ..IO="|TCP|2" 
+    ; Отклчение от сервера
+    d ..Send("exit")
+    CLOSE ..IO 
 Err
   }
   q
@@ -658,11 +662,11 @@ Method Send(cmd = "", GlobalResult = "") As %String
     s res =ex
  }
  q:res'="" res
-  ; if $e(cmd,1,1)=" "        q ""
-  ; if $e(cmd,1,3)="cls"      q ""
-  ; if $e(cmd,1,4)="exit"     q ""
-  ; if $e(cmd,1,3)="gl:"      q ""
-  ; if $e(cmd,1,7)="setapp:"  q ""
+    ; if $e(cmd,1,1)=" "        q ""
+    ; if $e(cmd,1,3)="cls"      q ""
+    ; if $e(cmd,1,4)="exit"     q ""
+    ; if $e(cmd,1,3)="gl:"      q ""
+    ; if $e(cmd,1,7)="setapp:"  q ""
    //set RequestSream = ##class(%GlobalCharacterStream).%New()
    s ..Request=""
    s ^||ind=0
@@ -979,22 +983,25 @@ ClassMethod childVar(port)
  .  USE $ZUTIL(53):(::"M")
  .  READ ^||inData:1
  .  if $l(^||inData)=0 q
- .  ; s ^debug(^||ind)=^||inData
+ .  ; s ^%debug(^||ind)=^||inData
+ .
+ .
  .  ; Декодируем если необходимо
- .  TRY{ if ^||isDecodeClientCommand=1 s ^||inData=$$$cspDecode(%session.Key,^||inData)}CATCH {}
+ .  TRY{  if ^||ind=1 {  s ^||inData=$$$cspDecode(%session.Key,^||inData)   s ^||isDecodeClientCommand=1     } }CATCH {   s ^||isDecodeClientCommand=0   }
+ .  TRY{  if ^||ind'=1,^||isDecodeClientCommand=1 { s ^||inData=$$$cspDecode(%session.Key,^||inData)    s ^||isDecodeClientCommand=1    } }CATCH {   s ^||isDecodeClientCommand=0   }
+ .
+ .
  .  s ^||inData= $ZCVT(^||inData,"I","URL")
  .  ; s ^||inData= $ZCVT(^||inData,"I","UTF8")
  .  s ^||ind=^||ind+1
  .  ; Авторизация 
- .  if ^||ind=1  d ..setProcInfo("Авторизация",20)  if ^||inData="ping" { w "ok" d ..stopCmd()  s ^||isCloseChaild=1 q }   s ^||UserName=^||inData  s ^||inData=""  w $System.Encryption.Base64Encode(%session.Key)  d ..stopCmd()  q
- .  if ^||ind=2  d ; Авторизация 
+ .  if ^||ind=1  d ..setProcInfo("Авторизация",20)  if ^||inData="ping" { w "ok" d ..stopCmd()  s ^||isCloseChaild=1 q }   s ^||UserName=^||inData   s ^||inData=""   w $System.Encryption.Base64Encode(%session.Key)    d ..stopCmd()    q
+ .  if ^||ind=2  d  ;  Авторизация 
  .  .    s ^||UserPass=^||inData
- .  .    
  .  .    if $p(^||ip,":",1)="127.0.0.1" {  
- .  .       s ^||IsLogOn=1
+ .  .        s ^||IsLogOn=1
  .  .    } else {
  .  .       if $SYSTEM.Security.Login(^||UserName,^||UserPass)=0  d 
- .  .       .   TRY{  s ^||UserPass=$$$cspDecode(%session.Key,^||inData) }CATCH { s ^||UserPass="" }
  .  .       .   if $SYSTEM.Security.Login(^||UserName,^||UserPass)=0  d
  .  .       .   .  s ^||isCloseChaild=1 
  .  .       .   .  w "Login error"  d ..stopCmd() 
