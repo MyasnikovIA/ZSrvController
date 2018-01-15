@@ -384,14 +384,14 @@ ClassMethod ExistSRV(HostLoc = "127.0.0.1", PortLoc = 6006) As %Boolean
 }
 
 /// Создать соединение с сервером
-Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "", isEncode = 0) As %Boolean
+Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "", isEncode = "") As %Boolean
 {
   s:Host'="" ..Host=Host
   s:NameSpace'="" ..NameSpace=NameSpace
   s:Port'="" ..Port=Port
   s:UserName'="" ..UserName=UserName
   s:UserPass'="" ..UserPass=UserPass
-  s ..isCode=isEncode
+  s:isEncode'="" ..isCode=isEncode
   ;  if $SYSTEM.Security.Login(..UserName,..UserPass)=0 {
   ;    s ..Error="Ошибка авторизации"
   ;    q 0   

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.1 (Build 792)" ts="2018-01-15 16:52:46">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.1 (Build 792)" ts="2018-01-15 16:54:50">
 <Class name="%ZMSrv.Controller">
 <Description><![CDATA[
 <br>  Класс написан для организации обмена между серверами Cache'.
@@ -259,7 +259,7 @@
  </example>]]></Description>
 <Language>cache</Language>
 <Super>%RegisteredObject,%CSP.Page</Super>
-<TimeChanged>64663,60697.458589</TimeChanged>
+<TimeChanged>64663,60868.903261</TimeChanged>
 <TimeCreated>64538,72047.112396</TimeCreated>
 
 <Parameter name="RawTag">
@@ -479,7 +479,7 @@ d ##class(%ZMSrv.Controller).ExportSrvUDL() </Description>
 <Method name="Connect">
 <Description>
 Создать соединение с сервером</Description>
-<FormalSpec>Host="",NameSpace="",Port="",UserName="",UserPass="",isEncode=0</FormalSpec>
+<FormalSpec>Host="",NameSpace="",Port="",UserName="",UserPass="",isEncode=""</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
   s:Host'="" ..Host=Host
@@ -487,7 +487,7 @@ d ##class(%ZMSrv.Controller).ExportSrvUDL() </Description>
   s:Port'="" ..Port=Port
   s:UserName'="" ..UserName=UserName
   s:UserPass'="" ..UserPass=UserPass
-  s ..isCode=isEncode
+  s:isEncode'="" ..isCode=isEncode
   ;  if $SYSTEM.Security.Login(..UserName,..UserPass)=0 {
   ;    s ..Error="Ошибка авторизации"
   ;    q 0   
