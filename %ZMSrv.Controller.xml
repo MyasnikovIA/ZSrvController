@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-32) 2017.1 (Build 792)" ts="2018-01-06 21:43:03">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.1 (Build 792)" ts="2018-01-15 15:08:43">
 <Class name="%ZMSrv.Controller">
 <Description><![CDATA[
 <br>  Класс написан для организации обмена между серверами Cache'.
@@ -259,7 +259,7 @@
  </example>]]></Description>
 <Language>cache</Language>
 <Super>%RegisteredObject,%CSP.Page</Super>
-<TimeChanged>64654,78155.77446</TimeChanged>
+<TimeChanged>64663,54438.222459</TimeChanged>
 <TimeCreated>64538,72047.112396</TimeCreated>
 
 <Parameter name="RawTag">
@@ -468,16 +468,20 @@
 <Method name="Connect">
 <Description>
 Создать соединение с сервером</Description>
-<FormalSpec>Host="",Port="",NameSpace="",UserName="",UserPass=""</FormalSpec>
+<FormalSpec>Host="",NameSpace="",Port="",UserName="",UserPass=""</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
-  #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
-  #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
   s:Host'="" ..Host=Host
+  s:NameSpace'="" ..NameSpace=NameSpace
   s:Port'="" ..Port=Port
   s:UserName'="" ..UserName=UserName
   s:UserPass'="" ..UserPass=UserPass
-  s:NameSpace'="" ..NameSpace=NameSpace
+  if $SYSTEM.Security.Login(..UserName,..UserPass)=0 {
+     s ..Error="Ошибка авторизации"
+     q 0   
+  }
+  #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
+  #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
   s ..isConnected=0
   SET ..IO="|TCP|2" 
   CLOSE ..IO
@@ -490,7 +494,23 @@
       s httpRequest.Server=..Host
       s httpRequest.Port=RemwebPort
       s className=$p(##THIS,"@",2)
-      s url=$System.CSP.GetDefaultApp(..NameSpace)_"/"_$replace(className,"%","%25")_".cls/?port="_..Port_"&namespace="_..NameSpace
+      s app=$System.CSP.GetDefaultApp(..NameSpace)
+      s isExistNameSpace=0
+      For i=1:1:$ZU(90,0){ 
+         if $l($ZU(90,2,0,i))>0 ,$ZCVT(..NameSpace,"L")=$ZCVT($ZU(90,2,0,i),"L"){
+	       s isExistNameSpace=1  
+	       q
+         }
+      }
+      if isExistNameSpace=0 {
+         s ..Error="Область имен "_..NameSpace_" на сервере не обнаружена."
+         q 0   
+      }
+      if app="" {
+         s ..Error="В области имен "_..NameSpace_" не определен DefaultApp."
+         q 0   
+      }
+      s url=app_"/"_$replace(className,"%","%25")_".cls/?port="_..Port_"&namespace="_..NameSpace
       d httpRequest.Get(url)
       s retHtml= httpRequest.HttpResponse.Data.Read(32000)
       if $l(retHtml,"Сервер запущен")>1 {
@@ -546,7 +566,7 @@
     s $ZTRAP="Err"
      SET ..IO="|TCP|2" 
      ; Отклчение от сервера
-     ; d ..Send("exit")
+     d ..Send("exit")
      CLOSE ..IO 
 Err
   }
@@ -738,7 +758,7 @@ Err
 <FormalSpec>cmd="",GlobalResult=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-      ;  s ..Breack=0    
+  ;  s ..Breack=0    
   s ..TimeRequest=0
   s TimeStart=$p($h,",",2)
   s ..length=0
@@ -891,12 +911,12 @@ Err
     }
      s tt=""
      s res=..Send("run")
-    s Time=+Time+..TimeRequest   
+     s Time=+Time+..TimeRequest   
      d ..Send("cls")
-    s Time=+Time+..TimeRequest     
-    s ..TimeRequest=+Time
-    k Time
-    q res
+     s Time=+Time+..TimeRequest     
+     s ..TimeRequest=+Time
+     k Time
+     q res
 ]]></Implementation>
 </Method>
 
@@ -1172,8 +1192,11 @@ Err
  .   d ..stopCmd()
  .
  USE $ZUTIL(53):(::"M")
+ s I=$ZU(111,0)
+ s ip=$A(I,1)_"."_$A(I,2)_"."_$A(I,3)_"."_$A(I,4)
+ s ipKey="Connect@"_$p(ip,":",1)_":"_$job
+ k ^%cspSession(ipKey)
  if ^||IsLogOn=0  w "Login error"  d ..stopCmd() 
- k ^%cspSession(^||ipKey)
  ; d ##class(%CSP.Session).%DeleteId(^||ipKey)
  k @%gl@($job)
  k ^SPOOL($job)
