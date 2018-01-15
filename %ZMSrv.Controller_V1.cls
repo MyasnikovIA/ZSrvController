@@ -331,15 +331,16 @@ ClassMethod ExportSrv(path = "")
 {
      s all("%ZMSrv.Controller.CLS")=""   ;
      ; s all("%ZMSrv.Run.CLS")=""   ;
-     if $l(path)=0     d $system.OBJ.Export(.all,"C:\TMP\%ZMSrv.Controller_V1.xml")
+     if $l(path)=0     d $system.OBJ.Export(.all,"C:\TMP\%ZMSrv.Controller.xml")
      e  d $system.OBJ.Export(.all,path)
 }
 
-/// d ##class(%ZMSrv.Controller).ExportSrvUDL()
+/// d ##class(%ZMSrv.Controller).ExportSrvUDL() 
 ClassMethod ExportSrvUDL(path = "")
 {
-   if $l(path)=0  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", "C:\TMP\%ZMSrv.Controller_V1.cls","/diffexport")
-   e  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", path,"/diffexport")
+ 
+    if $l(path)=0  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", "C:\TMP\%ZMSrv.Controller_V1.cls","/diffexport") 
+    e  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", path,"/diffexport")
 }
 
 ClassMethod OnPage() As %Status
@@ -384,15 +385,19 @@ ClassMethod ExistSRV(HostLoc = "127.0.0.1", PortLoc = 6006) As %Boolean
 }
 
 /// Создать соединение с сервером
-Method Connect(Host = "", Port = "", NameSpace = "", UserName = "", UserPass = "") As %Boolean
+Method Connect(Host = "", NameSpace = "", Port = "", UserName = "", UserPass = "") As %Boolean
 {
-  #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
-  #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
   s:Host'="" ..Host=Host
+  s:NameSpace'="" ..NameSpace=NameSpace
   s:Port'="" ..Port=Port
   s:UserName'="" ..UserName=UserName
   s:UserPass'="" ..UserPass=UserPass
-  s:NameSpace'="" ..NameSpace=NameSpace
+  if $SYSTEM.Security.Login(..UserName,..UserPass)=0 {
+     s ..Error="Ошибка авторизации"
+     q 0   
+  }
+  #define cspEncode(%k,%d)      $translate($System.Encryption.AESBase64Encode(%d,%k),"+=/"_$char(32,13,10),"_-$") 
+  #define cspDecode(%k,%d)      $System.Encryption.AESBase64Decode($translate(%d,"_-$","+=/"),%k) 
   s ..isConnected=0
   SET ..IO="|TCP|2" 
   CLOSE ..IO
@@ -405,7 +410,23 @@ Method Connect(Host = "", Port = "", NameSpace = "", UserName = "", UserPass = "
       s httpRequest.Server=..Host
       s httpRequest.Port=RemwebPort
       s className=$p(##THIS,"@",2)
-      s url=$System.CSP.GetDefaultApp(..NameSpace)_"/"_$replace(className,"%","%25")_".cls/?port="_..Port_"&namespace="_..NameSpace
+      s app=$System.CSP.GetDefaultApp(..NameSpace)
+      s isExistNameSpace=0
+      For i=1:1:$ZU(90,0){ 
+         if $l($ZU(90,2,0,i))>0 ,$ZCVT(..NameSpace,"L")=$ZCVT($ZU(90,2,0,i),"L"){
+	       s isExistNameSpace=1  
+	       q
+         }
+      }
+      if isExistNameSpace=0 {
+         s ..Error="Область имен "_..NameSpace_" на сервере не обнаружена."
+         q 0   
+      }
+      if app="" {
+         s ..Error="В области имен "_..NameSpace_" не определен DefaultApp."
+         q 0   
+      }
+      s url=app_"/"_$replace(className,"%","%25")_".cls/?port="_..Port_"&namespace="_..NameSpace
       d httpRequest.Get(url)
       s retHtml= httpRequest.HttpResponse.Data.Read(32000)
       if $l(retHtml,"Сервер запущен")>1 {
@@ -459,7 +480,7 @@ Method DisConnect()
     s $ZTRAP="Err"
      SET ..IO="|TCP|2" 
      ; Отклчение от сервера
-     ; d ..Send("exit")
+     d ..Send("exit")
      CLOSE ..IO 
 Err
   }
@@ -625,7 +646,7 @@ Method SocketRead() As %String
 /// Синхронный запрос на сервер
 Method Send(cmd = "", GlobalResult = "") As %String
 {
-      ;  s ..Breack=0    
+  ;  s ..Breack=0    
   s ..TimeRequest=0
   s TimeStart=$p($h,",",2)
   s ..length=0
@@ -774,12 +795,12 @@ Method RunClassMethod(ClassName = "", ClassMethodName = "", %args...) As %String
     }
      s tt=""
      s res=..Send("run")
-    s Time=+Time+..TimeRequest   
+     s Time=+Time+..TimeRequest   
      d ..Send("cls")
-    s Time=+Time+..TimeRequest     
-    s ..TimeRequest=+Time
-    k Time
-    q res
+     s Time=+Time+..TimeRequest     
+     s ..TimeRequest=+Time
+     k Time
+     q res
 }
 
 /// Уничтожение Старых зависших сесий и фрагментов кода
@@ -1032,8 +1053,11 @@ ClassMethod childVar(port)
  .   d ..stopCmd()
  .
  USE $ZUTIL(53):(::"M")
+ s I=$ZU(111,0)
+ s ip=$A(I,1)_"."_$A(I,2)_"."_$A(I,3)_"."_$A(I,4)
+ s ipKey="Connect@"_$p(ip,":",1)_":"_$job
+ k ^%cspSession(ipKey)
  if ^||IsLogOn=0  w "Login error"  d ..stopCmd() 
- k ^%cspSession(^||ipKey)
  ; d ##class(%CSP.Session).%DeleteId(^||ipKey)
  k @%gl@($job)
  k ^SPOOL($job)
