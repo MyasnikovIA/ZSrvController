@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.1 (Build 792)" ts="2018-01-15 15:13:46">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.1 (Build 792)" ts="2018-01-15 15:21:35">
 <Class name="%ZMSrv.Controller">
 <Description><![CDATA[
 <br>  Класс написан для организации обмена между серверами Cache'.
@@ -259,7 +259,7 @@
  </example>]]></Description>
 <Language>cache</Language>
 <Super>%RegisteredObject,%CSP.Page</Super>
-<TimeChanged>64663,54815.077564</TimeChanged>
+<TimeChanged>64663,55279.672437</TimeChanged>
 <TimeCreated>64538,72047.112396</TimeCreated>
 
 <Parameter name="RawTag">
@@ -409,10 +409,10 @@
 <ClassMethod>1</ClassMethod>
 <FormalSpec>path=""</FormalSpec>
 <Implementation><![CDATA[
-     s all("%ZMSrv.Controller.CLS")=""   ;
-     ; s all("%ZMSrv.Run.CLS")=""   ;
-     if $l(path)=0     d $system.OBJ.Export(.all,"C:\TMP\%ZMSrv.Controller.xml")
-     e  d $system.OBJ.Export(.all,path)
+   s all("%ZMSrv.Controller.CLS")=""   ;
+   ; s all("%ZMSrv.Run.CLS")=""   ;
+   if $l(path)=0     d $system.OBJ.Export(.all,"C:\TMP\%ZMSrv.Controller.xml")
+   e  d $system.OBJ.Export(.all,path)
 ]]></Implementation>
 </Method>
 
@@ -422,9 +422,8 @@ d ##class(%ZMSrv.Controller).ExportSrvUDL() </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>path=""</FormalSpec>
 <Implementation><![CDATA[
- 
-    if $l(path)=0  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", "C:\TMP\%ZMSrv.Controller_V1.cls","/diffexport") 
-    e  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", path,"/diffexport")
+  if $l(path)=0  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", "C:\TMP\%ZMSrv.Controller_V1.cls","/diffexport") 
+  e  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", path,"/diffexport")
 ]]></Implementation>
 </Method>
 
@@ -433,7 +432,7 @@ d ##class(%ZMSrv.Controller).ExportSrvUDL() </Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     /// Порт подключения 
-    s Port=6000
+    s Port=6006
     if $d(%request.Data("port",1))
     {
        s Port=%request.Data("port",1)  
@@ -444,9 +443,9 @@ d ##class(%ZMSrv.Controller).ExportSrvUDL() </Description>
       s NameSpace=%request.Data("namespace",1)  
     }
     if ##class(%ZMSrv.Controller).ExistSRV(,Port)'=1{
-        do ##class(%ZMSrv.Controller).StartSRV(Port,NameSpace)
-        w "Сервер запущен"
-        Quit $$$OK
+       do ##class(%ZMSrv.Controller).StartSRV(Port,NameSpace)
+       w "Сервер запущен"
+       Quit $$$OK
     }else{
        w "Сервер запущен"     
     }

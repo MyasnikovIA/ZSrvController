@@ -329,24 +329,23 @@ Property Breack As %Library.Boolean [ InitialExpression = 0 ];
 ///  d ##class(%ZMSrv.Controller).ExportSrv()
 ClassMethod ExportSrv(path = "")
 {
-     s all("%ZMSrv.Controller.CLS")=""   ;
-     ; s all("%ZMSrv.Run.CLS")=""   ;
-     if $l(path)=0     d $system.OBJ.Export(.all,"C:\TMP\%ZMSrv.Controller.xml")
-     e  d $system.OBJ.Export(.all,path)
+   s all("%ZMSrv.Controller.CLS")=""   ;
+   ; s all("%ZMSrv.Run.CLS")=""   ;
+   if $l(path)=0     d $system.OBJ.Export(.all,"C:\TMP\%ZMSrv.Controller.xml")
+   e  d $system.OBJ.Export(.all,path)
 }
 
 /// d ##class(%ZMSrv.Controller).ExportSrvUDL() 
 ClassMethod ExportSrvUDL(path = "")
 {
- 
-    if $l(path)=0  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", "C:\TMP\%ZMSrv.Controller_V1.cls","/diffexport") 
-    e  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", path,"/diffexport")
+  if $l(path)=0  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", "C:\TMP\%ZMSrv.Controller_V1.cls","/diffexport") 
+  e  d $system.OBJ.ExportUDL("%ZMSrv.Controller.CLS", path,"/diffexport")
 }
 
 ClassMethod OnPage() As %Status
 {
     /// Порт подключения 
-    s Port=6000
+    s Port=6006
     if $d(%request.Data("port",1))
     {
        s Port=%request.Data("port",1)  
@@ -357,9 +356,9 @@ ClassMethod OnPage() As %Status
       s NameSpace=%request.Data("namespace",1)  
     }
     if ##class(%ZMSrv.Controller).ExistSRV(,Port)'=1{
-        do ##class(%ZMSrv.Controller).StartSRV(Port,NameSpace)
-        w "Сервер запущен"
-        Quit $$$OK
+       do ##class(%ZMSrv.Controller).StartSRV(Port,NameSpace)
+       w "Сервер запущен"
+       Quit $$$OK
     }else{
        w "Сервер запущен"     
     }
