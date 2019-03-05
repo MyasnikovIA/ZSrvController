@@ -1,4 +1,4 @@
-<br># ZSrvController 
+<br># ZSrvController  (Cache` Intersystems)
 <br><h2>%ZMSrv.Controller</h2>
 <br>
 <br>Организации обмена между серверами Cache' (Удаленное подключение к серверу).
